@@ -17,7 +17,23 @@ export default {
           800: '#065f46',
           900: '#064e3b',
         }
-      }
+      },
+
+      keyframes: {
+        'bounce-smoothhg': {
+          '0%, 100%': {
+            transform: 'translateY(-25%)',
+            'animation-timing-function': 'cubic-bezier(0.8, 0, 1, 1)',
+          },
+          '50%': {
+            transform: 'translateY(0)',
+            'animation-timing-function': 'cubic-bezier(0, 0, 0.2, 1)',
+          },
+        },
+      },
+      animation: {
+        'bounce-smoothhg': 'bounce-smoothhg 1s infinite',
+      },
     },
   },
   plugins: [],

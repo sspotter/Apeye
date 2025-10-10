@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Plus, ExternalLink, Edit2, Trash2, Search, X, Folder, Globe, Loader2, Sparkles } from 'lucide-react';
+import { Plus, ExternalLink, Edit2, Trash2, Search, X, Folder, Globe, Loader2, Sparkles, Wand2, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { generateDescription } from '../lib/gemini';
+import { generateProductInfo } from '../lib/gemini';
 
 interface Resource {
   id: string;
@@ -32,6 +32,9 @@ export function Testerpage() {
   const [loading, setLoading] = useState(true);
   const [editingResource, setEditingResource] = useState<Resource | null>(null);
   const [generatingDescription, setGeneratingDescription] = useState(false);
+  const [autoFilling, setAutoFilling] = useState(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(true);
+  const [expandedResources, setExpandedResources] = useState<Set<string>>(new Set());
   const [formData, setFormData] = useState({
     category: '',
     newCategory: '',
@@ -107,6 +110,18 @@ export function Testerpage() {
   const switchTab = (categoryId: string) => {
     setActiveTab(categoryId);
     setSearchQuery(''); // Clear search when switching tabs
+  };
+
+  const toggleResourceExpanded = (resourceId: string) => {
+    setExpandedResources((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(resourceId)) {
+        newSet.delete(resourceId);
+      } else {
+        newSet.add(resourceId);
+      }
+      return newSet;
+    });
   };
 
   const openAddModal = () => {
@@ -269,6 +284,30 @@ export function Testerpage() {
     }
   };
 
+  const handleAutoFill = async () => {
+    if (!formData.name.trim()) {
+      alert('Please enter a website name first');
+      return;
+    }
+
+    setAutoFilling(true);
+
+    try {
+      const productInfo = await generateProductInfo(formData.name);
+      
+      setFormData({
+        ...formData,
+        url: productInfo.url,
+        description: productInfo.description,
+      });
+    } catch (error) {
+      console.error('Error auto-filling:', error);
+      alert(error instanceof Error ? error.message : 'Failed to auto-fill. Please try again.');
+    } finally {
+      setAutoFilling(false);
+    }
+  };
+
   const handleGenerateDescription = async () => {
     if (!formData.name.trim()) {
       alert('Please enter a website name first');
@@ -278,11 +317,10 @@ export function Testerpage() {
     setGeneratingDescription(true);
 
     try {
-      // Use website name or URL for generation
-      const input = formData.name || formData.url;
-      const description = await generateDescription(input);
+      // Get full product info and extract only description
+      const productInfo = await generateProductInfo(formData.name);
       
-      setFormData({ ...formData, description });
+      setFormData({ ...formData, description: productInfo.description });
     } catch (error) {
       console.error('Error generating description:', error);
       alert(error instanceof Error ? error.message : 'Failed to generate description. Please try again.');
@@ -322,7 +360,7 @@ export function Testerpage() {
           <button
             onClick={openAddModal}
             disabled={categories.length === 0}
-            className="flex items-center gap-2 px-4 py-2 theme-accent text-white font-medium rounded-lg hover:opacity-90 transition-opacity shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 theme-accent text-white font-medium rounded-lg hover:opacity-90 transition-opacity shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:animate-bounce-smoothhg"
           >
             <Plus className="w-5 h-5" />
             <span className="hidden sm:inline">Add Resource</span>
@@ -444,6 +482,7 @@ export function Testerpage() {
                   />
                   {searchQuery && (
                     <button
+                    title='Clear search'
                       onClick={() => setSearchQuery('')}
                       className="absolute right-3 top-1/2 -translate-y-1/2 theme-text-tertiary hover:theme-text-secondary"
                     >
@@ -464,72 +503,92 @@ export function Testerpage() {
                   </div>
                 ) : (
                   <div className="grid gap-4">
-                    {filteredResources.map((resource) => (
-                      <div
-                        key={resource.id}
-                        className="theme-bg-secondary theme-border border rounded-xl p-5 hover:shadow-md transition-shadow"
-                      >
-                        <div className="flex items-start gap-4">
-                          {/* Favicon */}
-                          <div className="flex-shrink-0 mt-1">
-                            {getFavicon(resource.url) ? (
-                              <img
-                                src={getFavicon(resource.url)!}
-                                alt=""
-                                className="w-8 h-8 rounded"
-                                onError={(e) => {
-                                  e.currentTarget.style.display = 'none';
-                                }}
-                              />
-                            ) : (
-                              <Globe className="w-8 h-8 theme-text-tertiary" />
-                            )}
-                          </div>
+                    {filteredResources.map((resource) => {
+                      const isExpanded = expandedResources.has(resource.id);
+                      return (
+                        <div
+                          key={resource.id}
+                          className="theme-bg-secondary theme-border border rounded-xl overflow-hidden hover:shadow-md transition-shadow"
+                        >
+                          {/* Collapsed Header - Always Visible */}
+                          <button
+                            onClick={() => toggleResourceExpanded(resource.id)}
+                            className="w-full flex items-center gap-4 p-5 hover:theme-bg-tertiary transition-colors text-left"
+                          >
+                            {/* Favicon */}
+                            <div className="flex-shrink-0">
+                              {getFavicon(resource.url) ? (
+                                <img
+                                  src={getFavicon(resource.url)!}
+                                  alt=""
+                                  className="w-8 h-8 rounded"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                  }}
+                                />
+                              ) : (
+                                <Globe className="w-8 h-8 theme-text-tertiary" />
+                              )}
+                            </div>
 
-                          {/* Content */}
-                          <div className="flex-1 min-w-0">
-                            <a
-                              href={resource.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="group flex items-center gap-2 mb-2"
-                            >
-                              <h4 className="text-lg font-semibold theme-text-primary group-hover:text-blue-500 transition-colors">
+                            {/* Title */}
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-lg font-semibold theme-text-primary truncate">
                                 {resource.name}
                               </h4>
-                              <ExternalLink className="w-4 h-4 theme-text-tertiary group-hover:text-blue-500 flex-shrink-0" />
-                            </a>
-                            <p className="text-sm theme-text-secondary mb-2">{resource.description}</p>
-                            <a
-                              href={resource.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs theme-text-tertiary hover:text-blue-500 transition-colors inline-block truncate max-w-full"
-                            >
-                              {resource.url}
-                            </a>
-                          </div>
+                            </div>
 
-                          {/* Actions */}
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            <button
-                              onClick={() => openEditModal(resource)}
-                              className="p-2 theme-text-secondary hover:theme-text-primary hover:theme-bg-tertiary rounded-lg transition-colors"
-                              title="Edit"
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => deleteResource(resource.id)}
-                              className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg transition-colors"
-                              title="Delete"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
+                            {/* Expand/Collapse Icon */}
+                            <div className="flex-shrink-0">
+                              {isExpanded ? (
+                                <ChevronUp className="w-5 h-5 theme-text-secondary" />
+                              ) : (
+                                <ChevronDown className="w-5 h-5 theme-text-secondary" />
+                              )}
+                            </div>
+                          </button>
+
+                          {/* Expanded Content */}
+                          {isExpanded && (
+                            <div className="px-5 pb-5 space-y-3">
+                              {/* Description */}
+                              <p className="text-sm theme-text-secondary">{resource.description}</p>
+                              
+                              {/* URL */}
+                              <a
+                                href={resource.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 text-sm theme-text-tertiary hover:text-blue-500 transition-colors group"
+                              >
+                                <ExternalLink className="w-4 h-4 flex-shrink-0" />
+                                <span className="truncate">{resource.url}</span>
+                              </a>
+
+                              {/* Action Buttons */}
+                              <div className="flex items-center gap-2 pt-2">
+                                <button
+                                  onClick={() => openEditModal(resource)}
+                                  className="flex items-center gap-2 px-4 py-2 theme-text-secondary hover:theme-text-primary hover:theme-bg-tertiary rounded-lg transition-colors"
+                                  title="Edit"
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                  <span className="text-sm font-medium">Edit</span>
+                                </button>
+                                <button
+                                  onClick={() => deleteResource(resource.id)}
+                                  className="flex items-center gap-2 px-4 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg transition-colors"
+                                  title="Delete"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                  <span className="text-sm font-medium">Delete</span>
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </>
@@ -549,6 +608,7 @@ export function Testerpage() {
               <button
                 onClick={closeModal}
                 className="theme-text-secondary hover:theme-text-primary transition-colors"
+                title="Close modal"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -561,6 +621,7 @@ export function Testerpage() {
                   Category
                 </label>
                 <select
+                title='Select a category'
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                   className="w-full px-4 py-2 theme-bg-tertiary theme-border border rounded-lg theme-text-primary focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -581,6 +642,7 @@ export function Testerpage() {
                   Or Create New Category
                 </label>
                 <input
+                title='Enter new category name'
                   type="text"
                   value={formData.newCategory}
                   onChange={(e) => setFormData({ ...formData, newCategory: e.target.value })}
@@ -595,6 +657,7 @@ export function Testerpage() {
                   Website Name *
                 </label>
                 <input
+                title='Enter website name'
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -604,6 +667,28 @@ export function Testerpage() {
                 />
               </div>
 
+              {/* AI Generation Buttons */}
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={handleAutoFill}
+                  disabled={!formData.name.trim() || autoFilling}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  title="Auto-fill URL and description using AI"
+                >
+                  {autoFilling ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Auto-filling...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="w-5 h-5" />
+                      <span>✨ Auto-fill All</span>
+                    </>
+                  )}
+                </button>
+              </div>
               {/* URL */}
               <div>
                 <label className="block text-sm font-medium theme-text-secondary mb-2">
@@ -619,18 +704,32 @@ export function Testerpage() {
                 />
               </div>
 
-              {/* Description */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium theme-text-secondary">
-                    Description *
-                  </label>
+              {/* Description - Collapsible */}
+              <div className="theme-bg-tertiary theme-border border rounded-lg overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                  className="w-full flex items-center justify-between px-4 py-3 hover:theme-bg-primary transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    {isDescriptionExpanded ? (
+                      <ChevronUp className="w-5 h-5 theme-text-secondary" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 theme-text-secondary" />
+                    )}
+                    <label className="text-sm font-medium theme-text-secondary cursor-pointer">
+                      Description * {formData.description && `(${formData.description.length} chars)`}
+                    </label>
+                  </div>
                   <button
                     type="button"
-                    onClick={handleGenerateDescription}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleGenerateDescription();
+                    }}
                     disabled={!formData.name.trim() || generatingDescription}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm theme-accent text-white font-medium rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                    title="Generate description using AI"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-gradient-to-r from-pink-500 to-orange-500 text-white font-semibold rounded-lg hover:from-pink-600 hover:to-orange-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+                    title="Generate description only using AI"
                   >
                     {generatingDescription ? (
                       <>
@@ -640,20 +739,25 @@ export function Testerpage() {
                     ) : (
                       <>
                         <Sparkles className="w-4 h-4" />
-                        <span>Generate Description</span>
+                        <span>Generate</span>
                       </>
                     )}
                   </button>
-                </div>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Brief description of the resource"
-                  rows={3}
-                  className="w-full px-4 py-2 theme-bg-tertiary theme-border border rounded-lg theme-text-primary placeholder:theme-text-tertiary focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                  required
-                  disabled={generatingDescription}
-                />
+                </button>
+                
+                {isDescriptionExpanded && (
+                  <div className="px-4 pb-4">
+                    <textarea
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      placeholder="Brief description of the resource"
+                      rows={4}
+                      className="w-full px-4 py-3 theme-bg-primary theme-border border rounded-lg theme-text-primary placeholder:theme-text-tertiary focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                      required
+                      disabled={generatingDescription}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Actions */}
