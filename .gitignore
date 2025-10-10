@@ -21,3 +21,7 @@ dist-ssr
 *.sln
 *.sw?
 .env
+src/components/Testerpage_gem_auto.tsx
+src/components/Testerpage_gem_autoclean.tsx
+src/components/Testerpagegem.tsx
+src/lib/gem_descriptivebutton.ts
