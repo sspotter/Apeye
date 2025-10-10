@@ -2,8 +2,8 @@ import { Key, Settings, FileText, Moon, Sun, Palette } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface NavigationProps {
-  currentPage: 'keys' | 'settings' | 'docs';
-  onPageChange: (page: 'keys' | 'settings' | 'docs') => void;
+  currentPage: 'keys' | 'settings' | 'docs' | 'tester';
+  onPageChange: (page: 'keys' | 'settings' | 'docs' | 'tester') => void;
 }
 
 export function Navigation({ currentPage, onPageChange }: NavigationProps) {
@@ -18,13 +18,14 @@ export function Navigation({ currentPage, onPageChange }: NavigationProps) {
   const cycleTheme = () => {
     if (theme === 'light') setTheme('dark');
     else if (theme === 'dark') setTheme('emerald');
-    else setTheme('light');
+    else setTheme('dark');
   };
 
   const navItems = [
     { id: 'keys' as const, label: 'API Keys', icon: Key },
     { id: 'settings' as const, label: 'Settings', icon: Settings },
     { id: 'docs' as const, label: 'Documentation', icon: FileText },
+    { id: 'tester' as const, label: 'TesterPage', icon: FileText },
   ];
 
   return (

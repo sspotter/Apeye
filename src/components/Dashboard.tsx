@@ -4,9 +4,10 @@ import { Navigation } from './Navigation';
 import { ApiKeysPage } from './ApiKeysPage';
 import { SettingsPage } from './SettingsPage';
 import { DocumentationPage } from './DocumentationPage';
+import { Testerpage } from './Testerpage';
 import { Key, LogOut } from 'lucide-react';
 
-type Page = 'keys' | 'settings' | 'docs';
+type Page = 'keys' | 'settings' | 'docs' | 'tester';
 
 export function Dashboard() {
   const { user, signOut } = useAuth();
@@ -18,8 +19,10 @@ export function Dashboard() {
         return <ApiKeysPage />;
       case 'settings':
         return <SettingsPage />;
-      case 'docs':
-        return <DocumentationPage />;
+        case 'docs':
+          return <DocumentationPage />;
+        case 'tester':
+          return <Testerpage />;
       default:
         return <ApiKeysPage />;
     }
