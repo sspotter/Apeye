@@ -5,6 +5,8 @@ import { ApiKeysTable } from './ApiKeysTable';
 import { ApiKeyModal } from './ApiKeyModal';
 import { Key, Plus, Search, Filter, Download, Upload } from 'lucide-react';
 import { encrypt } from '../lib/encryption';
+import toast, { Toaster } from 'react-hot-toast';
+import Swal from 'sweetalert2';
 
 export function ApiKeysPage() {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
@@ -49,7 +51,17 @@ export function ApiKeysPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this API key?')) return;
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (!result.isConfirmed) return;
 
     const { error } = await supabase
       .from('api_keys')
@@ -58,7 +70,26 @@ export function ApiKeysPage() {
 
     if (error) {
       console.error('Error deleting API key:', error);
+      toast.error('Failed to delete API key', {
+        style: {
+          border: '1px solid #ef4444',
+          padding: '16px',
+          color: '#ef4444',
+        },
+      });
     } else {
+      toast.success('Deleted successfully!', {
+        icon: '🗑️',
+        style: {
+          border: '1px solid #10b981',
+          padding: '16px',
+          color: '#10b981',
+        },
+        iconTheme: {
+          primary: '#10b981',
+          secondary: '#FFFAEE',
+        },
+      });
       fetchApiKeys();
     }
   };
@@ -125,13 +156,25 @@ export function ApiKeysPage() {
       const data = JSON.parse(text);
 
       if (!Array.isArray(data)) {
-        alert('Invalid file format. Expected an array of API keys.');
+        toast.error('Invalid file format. Expected an array of API keys.', {
+          style: {
+            border: '1px solid #ef4444',
+            padding: '16px',
+            color: '#ef4444',
+          },
+        });
         return;
       }
 
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) {
-        alert('You must be logged in to import data.');
+        toast.error('You must be logged in to import data.', {
+          style: {
+            border: '1px solid #ef4444',
+            padding: '16px',
+            color: '#ef4444',
+          },
+        });
         return;
       }
 
@@ -151,14 +194,36 @@ export function ApiKeysPage() {
 
       if (error) {
         console.error('Error importing data:', error);
-        alert('Failed to import data. Please check the file format.');
+        toast.error('Failed to import data. Please check the file format.', {
+          style: {
+            border: '1px solid #ef4444',
+            padding: '16px',
+            color: '#ef4444',
+          },
+        });
       } else {
-        alert(`Successfully imported ${importData.length} API keys!`);
+        toast.success(`Successfully imported ${importData.length} API keys!`, {
+          style: {
+            border: '1px solid #713200',
+            padding: '16px',
+            color: '#713200',
+          },
+          iconTheme: {
+            primary: '#713200',
+            secondary: '#FFFAEE',
+          },
+        });
         fetchApiKeys();
       }
     } catch (err) {
       console.error('Error parsing file:', err);
-      alert('Failed to parse file. Please ensure it is a valid JSON file.');
+      toast.error('Failed to parse file. Please ensure it is a valid JSON file.', {
+        style: {
+          border: '1px solid #ef4444',
+          padding: '16px',
+          color: '#ef4444',
+        },
+      });
     }
 
     if (fileInputRef.current) {
@@ -202,6 +267,7 @@ export function ApiKeysPage() {
           Import JSON
         </button>
         <input
+        title='Import JSON'
           ref={fileInputRef}
           type="file"
           accept=".json"
@@ -229,6 +295,7 @@ export function ApiKeysPage() {
             <div className="relative flex-1 sm:flex-initial">
               <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 theme-text-tertiary" />
               <select
+              title='Filter by tag'
                 value={selectedTag}
                 onChange={(e) => setSelectedTag(e.target.value)}
                 className="w-full pl-9 pr-4 py-2 theme-border border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent theme-bg-secondary theme-text-primary appearance-none"

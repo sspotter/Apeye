@@ -4,6 +4,8 @@ import { ApiKeysTable } from './ApiKeysTable';
 import { ApiKeyModal } from './ApiKeyModal';
 import { ExportImportButtons } from './ExportImportButtons';
 import { Key, Plus, Search, Filter } from 'lucide-react';
+import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 
 export function ApiKeysPage() {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
@@ -47,7 +49,17 @@ export function ApiKeysPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this API key?')) return;
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (!result.isConfirmed) return;
 
     const { error } = await supabase
       .from('api_keys')
@@ -56,7 +68,26 @@ export function ApiKeysPage() {
 
     if (error) {
       console.error('Error deleting API key:', error);
+      toast.error('Failed to delete API key', {
+        style: {
+          border: '1px solid #ef4444',
+          padding: '16px',
+          color: '#ef4444',
+        },
+      });
     } else {
+      toast.success('Deleted successfully!', {
+        icon: '🗑️',
+        style: {
+          border: '2px solid red',
+          padding: '16px',
+          color: 'red',
+        },
+        iconTheme: {
+          primary: 'red',
+          secondary: '#FFFAEE',
+        },
+      });
       fetchApiKeys();
     }
   };
@@ -70,7 +101,13 @@ export function ApiKeysPage() {
   const handleImportApiKeys = async (importedData: any[]) => {
     const user = (await supabase.auth.getUser()).data.user;
     if (!user) {
-      alert('You must be logged in to import data.');
+      toast.error('You must be logged in to import data.', {
+        style: {
+          border: '1px solid #ef4444',
+          padding: '16px',
+          color: '#ef4444',
+        },
+      });
       throw new Error('Not authenticated');
     }
 
@@ -90,6 +127,13 @@ export function ApiKeysPage() {
 
     if (error) {
       console.error('Error importing data:', error);
+      toast.error('Failed to import data. Please check the file format.', {
+        style: {
+          border: '1px solid #ef4444',
+          padding: '16px',
+          color: '#ef4444',
+        },
+      });
       throw new Error('Failed to import data. Please check the file format.');
     }
 

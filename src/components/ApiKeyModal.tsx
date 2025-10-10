@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase, type ApiKey } from '../lib/supabase';
 import { encrypt, decrypt } from '../lib/encryption';
 import { X, Plus } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface ApiKeyModalProps {
   apiKey: ApiKey | null;
@@ -77,17 +78,48 @@ export function ApiKeyModal({ apiKey, onClose }: ApiKeyModalProps) {
           .eq('id', apiKey.id);
 
         if (updateError) throw updateError;
+        
+        toast.success('API key updated successfully!', {
+          style: {
+            border: '1px solid #10b981',
+            padding: '16px',
+            color: '#10b981',
+          },
+          iconTheme: {
+            primary: '#10b981',
+            secondary: '#FFFAEE',
+          },
+        });
       } else {
         const { error: insertError } = await supabase
           .from('api_keys')
           .insert([data]);
 
         if (insertError) throw insertError;
+        
+        toast.success('API key added successfully!', {
+          style: {
+            border: '1px solid #713200',
+            padding: '16px',
+            color: '#713200',
+          },
+          iconTheme: {
+            primary: '#713200',
+            secondary: '#FFFAEE',
+          },
+        });
       }
 
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
+      toast.error(err instanceof Error ? err.message : 'An error occurred', {
+        style: {
+          border: '1px solid #ef4444',
+          padding: '16px',
+          color: '#ef4444',
+        },
+      });
     } finally {
       setLoading(false);
     }

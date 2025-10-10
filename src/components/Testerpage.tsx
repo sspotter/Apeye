@@ -4,6 +4,8 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { generateProductInfo } from '../lib/gemini';
 import { ExportImportButtons } from './ExportImportButtons';
+import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 
 interface Resource {
   id: string;
@@ -195,6 +197,18 @@ export function Testerpage() {
           .eq('id', editingResource.id);
 
         if (error) throw error;
+        
+        toast.success('Resource updated successfully!', {
+          style: {
+            border: '1px solid #10b981',
+            padding: '16px',
+            color: '#10b981',
+          },
+          iconTheme: {
+            primary: '#10b981',
+            secondary: '#FFFAEE',
+          },
+        });
       } else {
         // Create new resource
         const { error } = await supabase
@@ -208,6 +222,18 @@ export function Testerpage() {
           });
 
         if (error) throw error;
+        
+        toast.success('Resource added successfully!', {
+          style: {
+            border: '1px solid #713200',
+            padding: '16px',
+            color: '#713200',
+          },
+          iconTheme: {
+            primary: '#713200',
+            secondary: '#FFFAEE',
+          },
+        });
       }
 
       // Refresh data
@@ -221,12 +247,28 @@ export function Testerpage() {
       closeModal();
     } catch (error) {
       console.error('Error saving resource:', error);
-      alert('Failed to save resource. Please try again.');
+      toast.error('Failed to save resource. Please try again.', {
+        style: {
+          border: '1px solid #ef4444',
+          padding: '16px',
+          color: '#ef4444',
+        },
+      });
     }
   };
 
   const deleteResource = async (resourceId: string) => {
-    if (!confirm('Are you sure you want to delete this resource?')) return;
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       const { error } = await supabase
@@ -236,21 +278,49 @@ export function Testerpage() {
 
       if (error) throw error;
 
+      toast.success('Resource deleted successfully!', {
+        icon: '🗑️',
+        style: {
+          border: '1px solid #10b981',
+          padding: '16px',
+          color: '#10b981',
+        },
+        iconTheme: {
+          primary: '#10b981',
+          secondary: '#FFFAEE',
+        },
+      });
+
       // Refresh data
       await fetchData();
     } catch (error) {
       console.error('Error deleting resource:', error);
-      alert('Failed to delete resource. Please try again.');
+      toast.error('Failed to delete resource. Please try again.', {
+        style: {
+          border: '1px solid #ef4444',
+          padding: '16px',
+          color: '#ef4444',
+        },
+      });
     }
   };
 
   const deleteCategory = async (categoryId: string) => {
     const count = getCategoryCount(categoryId);
-    if (count > 0) {
-      if (!confirm(`This category has ${count} resource(s). Delete anyway?`)) return;
-    } else {
-      if (!confirm('Are you sure you want to delete this category?')) return;
-    }
+    
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: count > 0 
+        ? `This category has ${count} resource(s). All resources will be deleted!`
+        : "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       // Delete all resources in category first
@@ -269,6 +339,19 @@ export function Testerpage() {
 
       if (categoryError) throw categoryError;
 
+      toast.success('Category deleted successfully!', {
+        icon: '🗑️',
+        style: {
+          border: '1px solid #10b981',
+          padding: '16px',
+          color: '#10b981',
+        },
+        iconTheme: {
+          primary: '#10b981',
+          secondary: '#FFFAEE',
+        },
+      });
+
       // Switch to first available category
       const remainingCategories = categories.filter(c => c.id !== categoryId);
       if (remainingCategories.length > 0) {
@@ -281,13 +364,25 @@ export function Testerpage() {
       await fetchData();
     } catch (error) {
       console.error('Error deleting category:', error);
-      alert('Failed to delete category. Please try again.');
+      toast.error('Failed to delete category. Please try again.', {
+        style: {
+          border: '1px solid #ef4444',
+          padding: '16px',
+          color: '#ef4444',
+        },
+      });
     }
   };
 
   const handleAutoFill = async () => {
     if (!formData.name.trim()) {
-      alert('Please enter a website name first');
+      toast.error('Please enter a website name first', {
+        style: {
+          border: '1px solid #ef4444',
+          padding: '16px',
+          color: '#ef4444',
+        },
+      });
       return;
     }
 
@@ -301,9 +396,27 @@ export function Testerpage() {
         url: productInfo.url,
         description: productInfo.description,
       });
+      
+      toast.success('Auto-filled successfully!', {
+        style: {
+          border: '1px solid #10b981',
+          padding: '16px',
+          color: '#10b981',
+        },
+        iconTheme: {
+          primary: '#10b981',
+          secondary: '#FFFAEE',
+        },
+      });
     } catch (error) {
       console.error('Error auto-filling:', error);
-      alert(error instanceof Error ? error.message : 'Failed to auto-fill. Please try again.');
+      toast.error(error instanceof Error ? error.message : 'Failed to auto-fill. Please try again.', {
+        style: {
+          border: '1px solid #ef4444',
+          padding: '16px',
+          color: '#ef4444',
+        },
+      });
     } finally {
       setAutoFilling(false);
     }
@@ -311,7 +424,13 @@ export function Testerpage() {
 
   const handleGenerateDescription = async () => {
     if (!formData.name.trim()) {
-      alert('Please enter a website name first');
+      toast.error('Please enter a website name first', {
+        style: {
+          border: '1px solid #ef4444',
+          padding: '16px',
+          color: '#ef4444',
+        },
+      });
       return;
     }
 
@@ -322,9 +441,27 @@ export function Testerpage() {
       const productInfo = await generateProductInfo(formData.name);
       
       setFormData({ ...formData, description: productInfo.description });
+      
+      toast.success('Description generated successfully!', {
+        style: {
+          border: '1px solid #10b981',
+          padding: '16px',
+          color: '#10b981',
+        },
+        iconTheme: {
+          primary: '#10b981',
+          secondary: '#FFFAEE',
+        },
+      });
     } catch (error) {
       console.error('Error generating description:', error);
-      alert(error instanceof Error ? error.message : 'Failed to generate description. Please try again.');
+      toast.error(error instanceof Error ? error.message : 'Failed to generate description. Please try again.', {
+        style: {
+          border: '1px solid #ef4444',
+          padding: '16px',
+          color: '#ef4444',
+        },
+      });
     } finally {
       setGeneratingDescription(false);
     }
@@ -341,7 +478,13 @@ export function Testerpage() {
 
   const handleImportResources = async (importedData: any[]) => {
     if (!user) {
-      alert('You must be logged in to import data.');
+      toast.error('You must be logged in to import data.', {
+        style: {
+          border: '1px solid #ef4444',
+          padding: '16px',
+          color: '#ef4444',
+        },
+      });
       throw new Error('Not authenticated');
     }
 
