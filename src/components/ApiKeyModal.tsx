@@ -209,6 +209,7 @@ export function ApiKeyModal({ apiKey, onClose }: ApiKeyModalProps) {
                   placeholder="e.g., production, test, expired"
                 />
                 <button
+                title='Add tag'
                   type="button"
                   onClick={handleAddTag}
                   className="px-4 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 theme-text-secondary rounded-lg transition-colors"
@@ -225,6 +226,7 @@ export function ApiKeyModal({ apiKey, onClose }: ApiKeyModalProps) {
                     >
                       {tag}
                       <button
+                      title='Remove tag'
                         type="button"
                         onClick={() => handleRemoveTag(tag)}
                         className="hover:text-blue-900 dark:hover:text-blue-100"

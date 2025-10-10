@@ -52,6 +52,7 @@ export function SettingsPage() {
                 </div>
               </label>
               <input
+              title='Email Address'
                 type="email"
                 value={user?.email || ''}
                 disabled
@@ -70,6 +71,7 @@ export function SettingsPage() {
                 </div>
               </label>
               <input
+              title='User ID'
                 type="text"
                 value={user?.id || ''}
                 disabled

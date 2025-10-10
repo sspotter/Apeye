@@ -3,6 +3,7 @@ import { Plus, ExternalLink, Edit2, Trash2, Search, X, Folder, Globe, Loader2, S
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { generateProductInfo } from '../lib/gemini';
+import { ExportImportButtons } from './ExportImportButtons';
 
 interface Resource {
   id: string;
@@ -338,6 +339,77 @@ export function Testerpage() {
     }
   };
 
+  const handleImportResources = async (importedData: any[]) => {
+    if (!user) {
+      alert('You must be logged in to import data.');
+      throw new Error('Not authenticated');
+    }
+
+    // Create a map of category names to IDs
+    const categoryMap = new Map<string, string>();
+    categories.forEach(cat => categoryMap.set(cat.name.toLowerCase(), cat.id));
+
+    // Process imported data
+    const categoriesToCreate = new Set<string>();
+    const importData: any[] = [];
+
+    for (const item of importedData) {
+      const categoryName = item.category_name?.toLowerCase();
+      if (!categoryName) continue;
+
+      // Check if category exists
+      if (!categoryMap.has(categoryName)) {
+        categoriesToCreate.add(item.category_name);
+      }
+    }
+
+    // Create new categories if needed
+    if (categoriesToCreate.size > 0) {
+      const newCategories = Array.from(categoriesToCreate).map(name => ({
+        name,
+        user_id: user.id
+      }));
+
+      const { data: createdCategories, error: categoryError } = await supabase
+        .from('resource_categories')
+        .insert(newCategories)
+        .select();
+
+      if (categoryError) throw categoryError;
+
+      // Update category map with new categories
+      createdCategories?.forEach(cat => categoryMap.set(cat.name.toLowerCase(), cat.id));
+    }
+
+    // Prepare resources for import
+    for (const item of importedData) {
+      const categoryName = item.category_name?.toLowerCase();
+      const categoryId = categoryMap.get(categoryName);
+
+      if (categoryId) {
+        importData.push({
+          name: item.name,
+          url: item.url,
+          description: item.description || '',
+          category_id: categoryId,
+          user_id: user.id
+        });
+      }
+    }
+
+    // Insert resources
+    const { error: resourceError } = await supabase
+      .from('resources')
+      .insert(importData);
+
+    if (resourceError) {
+      console.error('Error importing resources:', resourceError);
+      throw new Error('Failed to import resources. Please check the file format.');
+    }
+
+    await fetchData();
+  };
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -350,6 +422,38 @@ export function Testerpage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Export/Import Buttons */}
+      {resources.length > 0 && (
+        <div className="mb-4 flex justify-end">
+          <ExportImportButtons
+            data={resources.map(resource => {
+              const category = categories.find(cat => cat.id === resource.category_id);
+              return {
+                ...resource,
+                category_name: category?.name || 'Unknown'
+              };
+            })}
+            onImport={handleImportResources}
+            exportFileName="resources-backup"
+            exportDataTransform={(items) => items.map(item => ({
+              name: item.name,
+              url: item.url,
+              description: item.description,
+              category_name: item.category_name,
+              created_at: item.created_at
+            }))}
+            csvHeaders={['Name', 'URL', 'Description', 'Category', 'Created At']}
+            csvRowTransform={(item) => [
+              item.name,
+              item.url,
+              item.description.replace(/,/g, ';'),
+              item.category_name,
+              item.created_at ? new Date(item.created_at).toLocaleDateString() : ''
+            ]}
+          />
+        </div>
+      )}
+
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
