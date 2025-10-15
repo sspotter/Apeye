@@ -1,10 +1,83 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { ChevronDown, ChevronRight, Edit, Save, Upload, FileText, X } from 'lucide-react';
+import { ChevronDown, ChevronRight, Edit, Save, Upload, FileText, X, Copy, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface MarkdownNotesSectionProps {
   serviceName: string;
+}
+
+// Code Block Component with Copy Button
+function CodeBlock({ code, language }: { code: string; language: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      toast.success('Code copied to clipboard!', {
+        icon: '📋',
+        duration: 2000,
+      });
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      toast.error('Failed to copy code');
+    }
+  };
+
+  return (
+    <div className="relative group my-3">
+      <div className="absolute right-2 top-2 z-10">
+        <button
+          onClick={handleCopy}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-slate-700 hover:bg-slate-600 text-white rounded-md transition-colors opacity-0 group-hover:opacity-100"
+          title="Copy code"
+        >
+          {copied ? (
+            <>
+              <Check className="w-3.5 h-3.5" />
+              Copied!
+            </>
+          ) : (
+            <>
+              <Copy className="w-3.5 h-3.5" />
+              Copy
+            </>
+          )}
+        </button>
+      </div>
+      <pre className="theme-bg-tertiary theme-border border rounded-lg p-4 pr-20 overflow-x-auto">
+        <code className={`text-sm font-mono theme-text-primary language-${language}`}>
+          {code}
+        </code>
+      </pre>
+    </div>
+  );
+}
+
+// Inline Code Component with Copy on Click
+function InlineCode({ code }: { code: string }) {
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      toast.success('Copied!', {
+        icon: '📋',
+        duration: 1500,
+      });
+    } catch (err) {
+      toast.error('Failed to copy');
+    }
+  };
+
+  return (
+    <code
+      onClick={handleCopy}
+      className="px-1.5 py-0.5 theme-bg-tertiary theme-text-primary rounded text-sm font-mono cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all"
+      title="Click to copy"
+    >
+      {code}
+    </code>
+  );
 }
 
 export function MarkdownNotesSection({ serviceName }: MarkdownNotesSectionProps) {
@@ -156,19 +229,16 @@ export function MarkdownNotesSection({ serviceName }: MarkdownNotesSectionProps)
       }
       // Code blocks
       else if (line.startsWith('```')) {
-        const language = line.substring(3);
+        const language = line.substring(3).trim() || 'plaintext';
         const codeLines: string[] = [];
         let i = index + 1;
         while (i < lines.length && !lines[i].startsWith('```')) {
           codeLines.push(lines[i]);
           i++;
         }
+        const codeContent = codeLines.join('\n');
         elements.push(
-          <pre key={index} className="theme-bg-tertiary theme-border border rounded-lg p-4 my-3 overflow-x-auto">
-            <code className={`text-sm font-mono theme-text-primary language-${language}`}>
-              {codeLines.join('\n')}
-            </code>
-          </pre>
+          <CodeBlock key={index} code={codeContent} language={language} />
         );
       }
       // Inline code
@@ -177,7 +247,7 @@ export function MarkdownNotesSection({ serviceName }: MarkdownNotesSectionProps)
         const formatted = parts.map((part, i) => 
           i % 2 === 0 
             ? part 
-            : <code key={i} className="px-1.5 py-0.5 theme-bg-tertiary theme-text-primary rounded text-sm font-mono">{part}</code>
+            : <InlineCode key={i} code={part} />
         );
         elements.push(<p key={index} className="theme-text-secondary mb-2">{formatted}</p>);
       }
@@ -199,14 +269,14 @@ export function MarkdownNotesSection({ serviceName }: MarkdownNotesSectionProps)
         );
         elements.push(<p key={index} className="theme-text-secondary mb-2">{formatted}</p>);
       }
-      // Regular paragraph
-      else if (line.trim()) {
-        elements.push(<p key={index} className="theme-text-secondary mb-2">{line}</p>);
-      }
+      // // Regular paragraph
+      // else if (line.trim()) {
+      //   elements.push(<p key={index} className="theme-text-secondary mb-2">{line}</p>);
+      // }
       // Empty line
-      else {
-        elements.push(<div key={index} className="h-2"></div>);
-      }
+      // else {
+      //   elements.push(<div key={index} className="h-2"></div>);
+      // }
     });
 
     return <div className="markdown-content">{elements}</div>;

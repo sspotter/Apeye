@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { CustomThemeEditor } from './CustomThemeEditor';
+import { DataManagementSection } from './DataManagementSection';
 import { User, Mail, Lock, LogOut, Trash2, CheckCircle } from 'lucide-react';
 
 export function SettingsPage() {
@@ -8,7 +10,7 @@ export function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const handleThemeChange = (newTheme: 'light' | 'dark' | 'emerald') => {
+  const handleThemeChange = (newTheme: 'light' | 'dark' | 'emerald' | 'custom') => {
     setTheme(newTheme);
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 2000);
@@ -95,7 +97,7 @@ export function SettingsPage() {
             <label className="block text-sm font-medium theme-text-secondary mb-3">
               Theme
             </label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <button
                 onClick={() => handleThemeChange('light')}
                 className={`p-4 rounded-lg theme-border border-2 transition-all ${
@@ -146,9 +148,32 @@ export function SettingsPage() {
                 </div>
                 <span className="text-sm font-medium theme-text-primary">Emerald</span>
               </button>
+
+              <button
+                onClick={() => handleThemeChange('custom')}
+                className={`p-4 rounded-lg theme-border border-2 transition-all ${
+                  theme === 'custom'
+                    ? 'border-purple-500 ring-2 ring-purple-200'
+                    : 'hover:theme-bg-tertiary'
+                }`}
+              >
+                <div className="bg-gradient-to-br from-purple-100 to-blue-100 rounded-md p-3 mb-2">
+                  <div className="bg-white rounded shadow-sm p-2">
+                    <div className="h-2 bg-gradient-to-r from-purple-400 to-blue-400 rounded mb-1"></div>
+                    <div className="h-2 bg-gradient-to-r from-purple-300 to-blue-300 rounded"></div>
+                  </div>
+                </div>
+                <span className="text-sm font-medium theme-text-primary">Custom</span>
+              </button>
             </div>
           </div>
         </section>
+
+        {/* Custom Theme Editor */}
+        <CustomThemeEditor />
+
+        {/* Data Management Section */}
+        <DataManagementSection />
 
         <section className="theme-bg-secondary theme-border border rounded-xl p-6">
           <div className="flex items-center gap-3 mb-6">

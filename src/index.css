@@ -38,6 +38,23 @@
     --accent: 16 185 129;
     --accent-hover: 5 150 105;
   }
+
+  :root.custom {
+    /* Default values - will be overridden by JavaScript */
+    --custom-primary: 59, 130, 246;
+    --custom-text: 15, 23, 42;
+    
+    /* Use custom colors for theme */
+    --bg-primary: 248 250 252;
+    --bg-secondary: 255 255 255;
+    --bg-tertiary: 241 245 249;
+    --text-primary: var(--custom-text);
+    --text-secondary: var(--custom-text);
+    --text-tertiary: var(--custom-text);
+    --border: 226 232 240;
+    --accent: var(--custom-primary);
+    --accent-hover: var(--custom-primary);
+  }
 }
 
 .theme-bg-primary {
