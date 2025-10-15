@@ -1,13 +1,15 @@
 import { useState, useRef } from 'react';
-import { ChevronDown, ChevronRight, Download, Upload, Database, AlertCircle } from 'lucide-react';
-import { exportAllData, importAllData, downloadExportFile, parseImportFile, getDataStats, type DatabaseExport } from '../lib/dataManagement';
+import { ChevronDown, ChevronRight, Download, Upload, Database, AlertCircle, Trash2 } from 'lucide-react';
+import { exportAllData, importAllData, downloadExportFile, parseImportFile, getDataStats, clearAllData, type DatabaseExport } from '../lib/dataManagement';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 
 export function DataManagementSection() {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isClearExpanded, setIsClearExpanded] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [progressText, setProgressText] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -169,7 +171,116 @@ export function DataManagementSection() {
     }
   };
 
-  const isLoading = isExporting || isImporting;
+  const handleClearAllData = async () => {
+    // First, ask if user wants to backup before clearing
+    const result = await Swal.fire({
+      title: '⚠️ Clear All Data',
+      html: `
+        <div class="text-left">
+          <p class="mb-4 text-gray-700">This will permanently delete ALL your data:</p>
+          <ul class="space-y-1 mb-4 text-gray-600">
+            <li>🔑 All API Keys</li>
+            <li>📝 All Service Notes</li>
+            <li>🗂️ All Categories</li>
+            <li>🔗 All Resources</li>
+          </ul>
+          <p class="text-sm font-semibold text-red-600">This action cannot be undone!</p>
+          <p class="text-sm text-gray-600 mt-4">Would you like to backup your data first?</p>
+        </div>
+      `,
+      showDenyButton: true,
+      showCancelButton: true,
+      confirmButtonText: '📦 Backup & Delete',
+      denyButtonText: '🗑️ Delete Without Backup',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#f59e0b',
+      denyButtonColor: '#ef4444',
+      icon: 'warning',
+    });
+
+    if (result.isDismissed) {
+      return; // User cancelled
+    }
+
+    try {
+      // If user wants to backup first
+      if (result.isConfirmed) {
+        setIsExporting(true);
+        setProgress(0);
+
+        // Export data
+        const data = await exportAllData((step, prog) => {
+          setProgressText(step);
+          setProgress(prog);
+        });
+
+        downloadExportFile(data);
+
+        toast.success('Backup downloaded! Now clearing data...', {
+          icon: '📦',
+          duration: 2000,
+        });
+
+        setIsExporting(false);
+        await new Promise(resolve => setTimeout(resolve, 500)); // Brief pause
+      }
+
+      // Final confirmation
+      const confirmDelete = await Swal.fire({
+        title: 'Final Confirmation',
+        text: 'Are you absolutely sure you want to delete ALL data?',
+        icon: 'error',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Delete Everything',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#ef4444',
+      });
+
+      if (!confirmDelete.isConfirmed) {
+        return;
+      }
+
+      // Clear all data
+      setIsClearing(true);
+      setProgress(0);
+
+      await clearAllData((step, prog) => {
+        setProgressText(step);
+        setProgress(prog);
+      });
+
+      toast.success(
+        <div>
+          <p className="font-semibold">All Data Cleared!</p>
+          <p className="text-sm">Your database has been wiped clean.</p>
+        </div>,
+        {
+          icon: '🗑️',
+          duration: 4000,
+          style: {
+            border: '2px solid #10b981',
+            padding: '16px',
+          },
+        }
+      );
+
+      // Reload page
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    } catch (error) {
+      console.error('Clear data error:', error);
+      toast.error('Failed to clear data. Please try again.', {
+        icon: '❌',
+      });
+    } finally {
+      setIsClearing(false);
+      setProgress(0);
+      setProgressText('');
+    }
+  };
+
+  const isLoading = isExporting || isImporting || isClearing;
 
   return (
     <section className="theme-bg-secondary theme-border border rounded-xl overflow-hidden">
@@ -316,6 +427,97 @@ export function DataManagementSection() {
                 Deletes all existing data and replaces it with imported data. Use with caution!
               </p>
             </div>
+          </div>
+
+          {/* Clear All Data Section */}
+          <div className="border-t theme-border pt-6">
+            <button
+              onClick={() => setIsClearExpanded(!isClearExpanded)}
+              className="w-full flex items-center justify-between p-4 theme-bg-tertiary hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors group"
+            >
+              <div className="flex items-center gap-3">
+                {isClearExpanded ? (
+                  <ChevronDown className="w-4 h-4 theme-text-tertiary group-hover:text-red-600" />
+                ) : (
+                  <ChevronRight className="w-4 h-4 theme-text-tertiary group-hover:text-red-600" />
+                )}
+                <Trash2 className="w-5 h-5 text-red-600" />
+                <div className="text-left">
+                  <h3 className="text-sm font-semibold theme-text-primary group-hover:text-red-600">
+                    Clear All Data
+                  </h3>
+                  <p className="text-xs theme-text-tertiary">
+                    Permanently delete everything
+                  </p>
+                </div>
+              </div>
+              <span className="text-xs px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded">
+                Danger Zone
+              </span>
+            </button>
+
+            {isClearExpanded && (
+              <div className="mt-4 space-y-4">
+                {/* Warning Box */}
+                <div className="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                  <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="text-red-900 dark:text-red-100 font-medium mb-1">
+                      ⚠️ Permanent Deletion Warning
+                    </p>
+                    <p className="text-red-700 dark:text-red-300">
+                      This will permanently delete ALL your data including API keys, service notes, 
+                      categories, and resources. <strong>This action cannot be undone!</strong>
+                    </p>
+                    <p className="text-red-700 dark:text-red-300 mt-2">
+                      We'll offer to backup your data before deletion.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Clear Button */}
+                <button
+                  onClick={handleClearAllData}
+                  disabled={isLoading}
+                  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-xl hover:from-red-700 hover:to-red-800 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed group"
+                >
+                  <Trash2 className={`w-5 h-5 ${isClearing ? 'animate-bounce' : 'group-hover:animate-bounce'}`} />
+                  <div className="text-left">
+                    <div>{isClearing ? 'Clearing Data...' : 'Clear All Data'}</div>
+                    <div className="text-xs opacity-90">Backup option available</div>
+                  </div>
+                </button>
+
+                {/* What Will Be Deleted */}
+                <div className="p-4 theme-bg-tertiary rounded-lg border-2 border-red-500/20">
+                  <h4 className="text-sm font-semibold theme-text-primary mb-3">
+                    What will be deleted:
+                  </h4>
+                  <ul className="space-y-2 text-sm theme-text-secondary">
+                    <li className="flex items-center gap-2">
+                      <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                      All API keys (cannot be recovered)
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                      All service documentation
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                      All resource categories
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                      All saved resources
+                    </li>
+                    <li className="flex items-center gap-2 text-red-600 font-semibold">
+                      <span className="w-2 h-2 bg-red-600 rounded-full"></span>
+                      EVERYTHING in your database!
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

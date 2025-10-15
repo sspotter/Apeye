@@ -143,11 +143,14 @@ export async function importAllData(
   if (data.data.apiKeys && data.data.apiKeys.length > 0) {
     onProgress?.('Importing API Keys...', 30);
     
-    const apiKeysToImport = data.data.apiKeys.map(key => ({
-      ...key,
-      user_id: user.id,
-      id: mode === 'replace' ? key.id : undefined // Keep ID if replace, generate new if merge
-    }));
+    const apiKeysToImport = data.data.apiKeys.map(key => {
+      const { id, ...rest } = key;
+      return {
+        ...rest,
+        user_id: user.id,
+        ...(mode === 'replace' && { id }) // Only include id if replace mode
+      };
+    });
 
     const { error: apiKeysError } = await supabase
       .from('api_keys')
@@ -160,11 +163,14 @@ export async function importAllData(
   if (data.data.serviceNotes && data.data.serviceNotes.length > 0) {
     onProgress?.('Importing Service Notes...', 50);
     
-    const notesToImport = data.data.serviceNotes.map(note => ({
-      ...note,
-      user_id: user.id,
-      id: mode === 'replace' ? note.id : undefined
-    }));
+    const notesToImport = data.data.serviceNotes.map(note => {
+      const { id, ...rest } = note;
+      return {
+        ...rest,
+        user_id: user.id,
+        ...(mode === 'replace' && { id })
+      };
+    });
 
     const { error: notesError } = await supabase
       .from('service_notes')
@@ -177,11 +183,14 @@ export async function importAllData(
   if (data.data.resourceCategories && data.data.resourceCategories.length > 0) {
     onProgress?.('Importing Resource Categories...', 70);
     
-    const categoriesToImport = data.data.resourceCategories.map(cat => ({
-      ...cat,
-      user_id: user.id,
-      id: mode === 'replace' ? cat.id : undefined
-    }));
+    const categoriesToImport = data.data.resourceCategories.map(cat => {
+      const { id, ...rest } = cat;
+      return {
+        ...rest,
+        user_id: user.id,
+        ...(mode === 'replace' && { id })
+      };
+    });
 
     const { error: categoriesError } = await supabase
       .from('resource_categories')
@@ -194,11 +203,14 @@ export async function importAllData(
   if (data.data.resources && data.data.resources.length > 0) {
     onProgress?.('Importing Resources...', 90);
     
-    const resourcesToImport = data.data.resources.map(res => ({
-      ...res,
-      user_id: user.id,
-      id: mode === 'replace' ? res.id : undefined
-    }));
+    const resourcesToImport = data.data.resources.map(res => {
+      const { id, ...rest } = res;
+      return {
+        ...rest,
+        user_id: user.id,
+        ...(mode === 'replace' && { id })
+      };
+    });
 
     const { error: resourcesError } = await supabase
       .from('resources')
@@ -269,4 +281,55 @@ export function getDataStats(data: DatabaseExport): {
       (data.data.resourceCategories?.length || 0) +
       (data.data.resources?.length || 0)
   };
+}
+
+/**
+ * Clear all user data from the database
+ */
+export async function clearAllData(
+  onProgress?: (step: string, progress: number) => void
+): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+
+  // Step 1: Delete Resources
+  onProgress?.('Deleting Resources...', 25);
+  const { error: resourcesError } = await supabase
+    .from('resources')
+    .delete()
+    .eq('user_id', user.id);
+  
+  if (resourcesError) throw resourcesError;
+
+  // Step 2: Delete Resource Categories
+  onProgress?.('Deleting Resource Categories...', 50);
+  const { error: categoriesError } = await supabase
+    .from('resource_categories')
+    .delete()
+    .eq('user_id', user.id);
+  
+  if (categoriesError) throw categoriesError;
+
+  // Step 3: Delete Service Notes
+  onProgress?.('Deleting Service Notes...', 75);
+  const { error: notesError } = await supabase
+    .from('service_notes')
+    .delete()
+    .eq('user_id', user.id);
+  
+  if (notesError) throw notesError;
+
+  // Step 4: Delete API Keys
+  onProgress?.('Deleting API Keys...', 90);
+  const { error: apiKeysError } = await supabase
+    .from('api_keys')
+    .delete()
+    .eq('user_id', user.id);
+  
+  if (apiKeysError) throw apiKeysError;
+
+  onProgress?.('All Data Cleared!', 100);
 }
