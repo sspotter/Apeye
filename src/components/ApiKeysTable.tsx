@@ -146,7 +146,7 @@ export function ApiKeysTable({ apiKeys, onEdit, onDelete }: ApiKeysTableProps) {
                       <code className="text-sm font-mono text-slate-700 dark:text-slate-300 truncate max-w-xs">
                         {visibleKeys.has(key.id)
                           ? decryptedData.get(key.id)?.key || 'tvly-dev-***'
-                          : 'tvly-dev-*********************'}
+                          : 'Donot-Invoke-*********************'}
                       </code>
                       <button
                         onClick={() => toggleVisibility(key.id, 'key', key.encrypted_api_key)}

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase, type ApiKey } from '../lib/supabase';
 import { ApiKeysTable } from './ApiKeysTable';
 import { ApiKeyModal } from './ApiKeyModal';
+import { MassAddModal } from './MassAddModal';
 import { ExportImportButtons } from './ExportImportButtons';
 import { getServiceMetadata } from '../lib/serviceMetadata';
 import { ArrowLeft, Plus, Key, Users } from 'lucide-react';
@@ -315,24 +316,13 @@ export function WebsitePage() {
         />
       )}
 
-      {/* TODO: Mass Add Modal - Will be created in next phase */}
+      {/* Mass Add Modal */}
       {isMassAddOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="theme-bg-secondary theme-border border rounded-xl max-w-2xl w-full p-6">
-            <h2 className="text-xl font-semibold theme-text-primary mb-4">
-              Mass Add Keys (Coming Soon)
-            </h2>
-            <p className="theme-text-secondary mb-4">
-              This feature will allow you to add multiple API keys at once.
-            </p>
-            <button
-              onClick={() => setIsMassAddOpen(false)}
-              className="px-4 py-2 theme-accent text-white rounded-lg hover:opacity-90"
-            >
-              Close
-            </button>
-          </div>
-        </div>
+        <MassAddModal
+          serviceName={decodedServiceName}
+          onClose={() => setIsMassAddOpen(false)}
+          onSuccess={fetchServiceKeys}
+        />
       )}
     </div>
   );
