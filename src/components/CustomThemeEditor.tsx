@@ -120,6 +120,7 @@ export function CustomThemeEditor() {
             <span className="text-xs font-mono theme-text-tertiary">{color.r}</span>
           </div>
           <input
+          title='Red'
             type="range"
             min="0"
             max="255"
@@ -139,6 +140,7 @@ export function CustomThemeEditor() {
             <span className="text-xs font-mono theme-text-tertiary">{color.g}</span>
           </div>
           <input
+          title='Green'
             type="range"
             min="0"
             max="255"
@@ -158,6 +160,7 @@ export function CustomThemeEditor() {
             <span className="text-xs font-mono theme-text-tertiary">{color.b}</span>
           </div>
           <input
+          title='Blue'
             type="range"
             min="0"
             max="255"

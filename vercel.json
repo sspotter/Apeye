@@ -1,7 +1,23 @@
 {
   "rewrites": [
     {
-      "source": "/((?!api|_next/static|_next/image|favicon.ico|.*\\.).*)",
+      "source": "/api-keys/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/settings/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/docs/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/resources/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/((?!api/|_next/static|_next/image|favicon.ico|.*\\.).*)",
       "destination": "/index.html"
     }
   ]

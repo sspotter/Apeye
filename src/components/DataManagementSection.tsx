@@ -376,6 +376,7 @@ export function DataManagementSection() {
 
             {/* Hidden file input */}
             <input
+            title='Import'
               ref={fileInputRef}
               type="file"
               accept=".json"
