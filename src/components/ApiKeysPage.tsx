@@ -3,9 +3,12 @@ import { supabase, type ApiKey } from '../lib/supabase';
 import { ApiKeysTable } from './ApiKeysTable';
 import { ApiKeyModal } from './ApiKeyModal';
 import { ExportImportButtons } from './ExportImportButtons';
-import { Key, Plus, Search, Filter } from 'lucide-react';
+import { ServiceOverview } from './ServiceOverview';
+import { Key, Plus, Search, Filter, Grid, List } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
+
+type ViewMode = 'grid' | 'table';
 
 export function ApiKeysPage() {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
@@ -15,6 +18,7 @@ export function ApiKeysPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string>('');
   const [allTags, setAllTags] = useState<string[]>([]);
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
   useEffect(() => {
     fetchApiKeys();
@@ -181,61 +185,91 @@ export function ApiKeysPage() {
         />
       </div>
 
-      <div className="mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex-1 w-full sm:w-auto">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 theme-text-tertiary" />
-            <input
-              type="text"
-              placeholder="Search services, emails, or notes..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 theme-border border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent theme-bg-secondary theme-text-primary"
-            />
+      <div className="mb-6 flex flex-col gap-4">
+        {/* Top Row: Search and Actions */}
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          <div className="flex-1 w-full sm:w-auto">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 theme-text-tertiary" />
+              <input
+                type="text"
+                placeholder="Search services, emails, or notes..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 theme-border border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent theme-bg-secondary theme-text-primary"
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-3 w-full sm:w-auto">
+            {allTags.length > 0 && (
+              <div className="relative flex-1 sm:flex-initial">
+                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 theme-text-tertiary" />
+                <select
+                title='Filter by tag'
+                  value={selectedTag}
+                  onChange={(e) => setSelectedTag(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 theme-border border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent theme-bg-secondary theme-text-primary appearance-none"
+                >
+                  <option value="">All Tags</option>
+                  {allTags.map(tag => (
+                    <option key={tag} value={tag}>{tag}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <button
+              onClick={handleAdd}
+              className="flex items-center gap-2 px-4 py-2 theme-accent theme-accent-hover text-white font-medium rounded-lg transition-colors whitespace-nowrap"
+            >
+              <Plus className="w-5 h-5" />
+              Add Key
+            </button>
           </div>
         </div>
 
-        <div className="flex gap-3 w-full sm:w-auto">
-          {allTags.length > 0 && (
-            <div className="relative flex-1 sm:flex-initial">
-              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 theme-text-tertiary" />
-              <select
-              title='Filter by tag'
-                value={selectedTag}
-                onChange={(e) => setSelectedTag(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 theme-border border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent theme-bg-secondary theme-text-primary appearance-none"
+        {/* View Mode Toggle */}
+        {!searchQuery && !selectedTag && (
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold theme-text-primary">
+              {viewMode === 'grid' ? 'All Services' : 'All API Keys'}
+            </h2>
+            <div className="flex items-center gap-2 theme-bg-secondary theme-border border rounded-lg p-1">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  viewMode === 'grid'
+                    ? 'theme-accent text-white'
+                    : 'theme-text-secondary hover:theme-bg-tertiary'
+                }`}
+                title="Grid View"
               >
-                <option value="">All Tags</option>
-                {allTags.map(tag => (
-                  <option key={tag} value={tag}>{tag}</option>
-                ))}
-              </select>
+                <Grid className="w-4 h-4" />
+                <span className="hidden sm:inline">Grid</span>
+              </button>
+              <button
+                onClick={() => setViewMode('table')}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  viewMode === 'table'
+                    ? 'theme-accent text-white'
+                    : 'theme-text-secondary hover:theme-bg-tertiary'
+                }`}
+                title="Table View"
+              >
+                <List className="w-4 h-4" />
+                <span className="hidden sm:inline">Table</span>
+              </button>
             </div>
-          )}
-
-          <button
-            onClick={handleAdd}
-            className="flex items-center gap-2 px-4 py-2 theme-accent theme-accent-hover text-white font-medium rounded-lg transition-colors whitespace-nowrap"
-          >
-            <Plus className="w-5 h-5" />
-            Add Key
-          </button>
-        </div>
+          </div>
+        )}
       </div>
 
       {loading ? (
         <div className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
         </div>
-      ) : (
-        <ApiKeysTable
-          apiKeys={filteredKeys}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
-      )}
-
-      {!loading && filteredKeys.length === 0 && (
+      ) : filteredKeys.length === 0 ? (
         <div className="text-center py-12 theme-bg-secondary rounded-xl theme-border border">
           <Key className="w-12 h-12 theme-text-tertiary mx-auto mb-4" />
           <h3 className="text-lg font-medium theme-text-primary mb-2">
@@ -256,6 +290,19 @@ export function ApiKeysPage() {
             </button>
           )}
         </div>
+      ) : (
+        <>
+          {/* Show Grid View (Services) or Table View (All Keys) */}
+          {viewMode === 'grid' && !searchQuery && !selectedTag ? (
+            <ServiceOverview apiKeys={filteredKeys} />
+          ) : (
+            <ApiKeysTable
+              apiKeys={filteredKeys}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
+        </>
       )}
 
       {isModalOpen && (

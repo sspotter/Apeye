@@ -599,42 +599,42 @@ export function Testerpage() {
 
       {/* Header */}
       <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <div>
-            <h1 className="text-3xl font-bold theme-text-primary mb-2">Resource Library</h1>
-            <p className="theme-text-secondary">Organize and access your favorite web resources</p>
+            <h1 className="text-2xl sm:text-3xl font-bold theme-text-primary mb-2">Resource Library</h1>
+            <p className="text-sm sm:text-base theme-text-secondary">Organize and access your favorite web resources</p>
           </div>
           <button
             onClick={openAddModal}
             disabled={categories.length === 0}
-            className="flex items-center gap-2 px-4 py-2 theme-accent text-white font-medium rounded-lg hover:opacity-90 transition-opacity shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:animate-bounce-smoothhg"
+            className="flex items-center justify-center gap-2 px-4 py-2 theme-accent text-white font-medium rounded-lg hover:opacity-90 transition-opacity shadow-lg disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
             <Plus className="w-5 h-5" />
-            <span className="hidden sm:inline">Add Resource</span>
+            <span>Add Resource</span>
           </button>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="theme-bg-secondary theme-border border rounded-lg p-4">
-            <div className="flex items-center gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          <div className="theme-bg-secondary theme-border border rounded-lg p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
               <div className="theme-accent p-2 rounded-lg">
-                <Folder className="w-5 h-5 text-white" />
+                <Folder className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
               <div>
-                <p className="text-2xl font-bold theme-text-primary">{categories.length}</p>
-                <p className="text-sm theme-text-secondary">Categories</p>
+                <p className="text-xl sm:text-2xl font-bold theme-text-primary">{categories.length}</p>
+                <p className="text-xs sm:text-sm theme-text-secondary">Categories</p>
               </div>
             </div>
           </div>
-          <div className="theme-bg-secondary theme-border border rounded-lg p-4">
-            <div className="flex items-center gap-3">
+          <div className="theme-bg-secondary theme-border border rounded-lg p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
               <div className="theme-accent p-2 rounded-lg">
-                <Globe className="w-5 h-5 text-white" />
+                <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
               <div>
-                <p className="text-2xl font-bold theme-text-primary">{resources.length}</p>
-                <p className="text-sm theme-text-secondary">Resources</p>
+                <p className="text-xl sm:text-2xl font-bold theme-text-primary">{resources.length}</p>
+                <p className="text-xs sm:text-sm theme-text-secondary">Resources</p>
               </div>
             </div>
           </div>
@@ -663,28 +663,28 @@ export function Testerpage() {
           </button>
         </div>
       ) : (
-        <div className="flex gap-6">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar with Category Tabs */}
-          <div className="w-64 flex-shrink-0">
-            <div className="theme-bg-secondary theme-border border rounded-xl p-3 sticky top-4">
+          <div className="w-full lg:w-64 flex-shrink-0">
+            <div className="theme-bg-secondary theme-border border rounded-xl p-3 lg:sticky lg:top-4">
               <h3 className="text-sm font-semibold theme-text-secondary uppercase tracking-wide px-3 mb-3">
                 Categories
               </h3>
-              <div className="space-y-1">
+              <div className="space-y-1 max-h-[200px] lg:max-h-none overflow-y-auto lg:overflow-visible">
                 {categories.map((category) => (
                   <button
                     key={category.id}
                     onClick={() => switchTab(category.id)}
-                    className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors flex items-center justify-between group ${
+                    className={`w-full text-left px-3 py-2 sm:py-2.5 rounded-lg transition-colors flex items-center justify-between group ${
                       activeTab === category.id
                         ? 'theme-accent text-white'
                         : 'theme-text-primary hover:theme-bg-tertiary'
                     }`}
                   >
-                    <span className="font-medium truncate">{category.name}</span>
-                    <div className="flex items-center gap-2">
+                    <span className="text-sm sm:text-base font-medium truncate">{category.name}</span>
+                    <div className="flex items-center gap-1 sm:gap-2">
                       <span
-                        className={`text-xs px-2 py-0.5 rounded-full ${
+                        className={`text-xs px-1.5 sm:px-2 py-0.5 rounded-full ${
                           activeTab === category.id
                             ? 'bg-white/20 text-white'
                             : 'theme-bg-tertiary theme-text-tertiary'
@@ -697,7 +697,7 @@ export function Testerpage() {
                           e.stopPropagation();
                           deleteCategory(category.id);
                         }}
-                        className={`opacity-0 group-hover:opacity-100 p-1 rounded transition-opacity ${
+                        className={`opacity-100 lg:opacity-0 group-hover:opacity-100 p-1 rounded transition-opacity ${
                           activeTab === category.id
                             ? 'hover:bg-white/20 text-white'
                             : 'hover:bg-red-100 text-red-500'
@@ -740,16 +740,16 @@ export function Testerpage() {
 
                 {/* Resources Grid */}
                 {filteredResources.length === 0 ? (
-                  <div className="text-center py-12 theme-bg-secondary theme-border border rounded-xl">
-                    <Globe className="w-12 h-12 theme-text-tertiary mx-auto mb-3" />
-                    <p className="theme-text-secondary">
+                  <div className="text-center py-8 sm:py-12 theme-bg-secondary theme-border border rounded-xl">
+                    <Globe className="w-10 h-10 sm:w-12 sm:h-12 theme-text-tertiary mx-auto mb-3" />
+                    <p className="text-sm sm:text-base theme-text-secondary px-4">
                       {searchQuery
                         ? 'No resources found matching your search'
                         : 'No resources in this category yet. Add your first one!'}
                     </p>
                   </div>
                 ) : (
-                  <div className="grid gap-4">
+                  <div className="grid gap-3 sm:gap-4">
                     {filteredResources.map((resource) => {
                       const isExpanded = expandedResources.has(resource.id);
                       return (
@@ -760,7 +760,7 @@ export function Testerpage() {
                           {/* Collapsed Header - Always Visible */}
                           <button
                             onClick={() => toggleResourceExpanded(resource.id)}
-                            className="w-full flex items-center gap-4 p-5 hover:theme-bg-tertiary transition-colors text-left"
+                            className="w-full flex items-center gap-3 sm:gap-4 p-3 sm:p-5 hover:theme-bg-tertiary transition-colors text-left"
                           >
                             {/* Favicon */}
                             <div className="flex-shrink-0">
@@ -768,19 +768,19 @@ export function Testerpage() {
                                 <img
                                   src={getFavicon(resource.url)!}
                                   alt=""
-                                  className="w-8 h-8 rounded"
+                                  className="w-6 h-6 sm:w-8 sm:h-8 rounded"
                                   onError={(e) => {
                                     e.currentTarget.style.display = 'none';
                                   }}
                                 />
                               ) : (
-                                <Globe className="w-8 h-8 theme-text-tertiary" />
+                                <Globe className="w-6 h-6 sm:w-8 sm:h-8 theme-text-tertiary" />
                               )}
                             </div>
 
                             {/* Title */}
                             <div className="flex-1 min-w-0">
-                              <h4 className="text-lg font-semibold theme-text-primary truncate">
+                              <h4 className="text-base sm:text-lg font-semibold theme-text-primary truncate">
                                 {resource.name}
                               </h4>
                             </div>
@@ -788,35 +788,35 @@ export function Testerpage() {
                             {/* Expand/Collapse Icon */}
                             <div className="flex-shrink-0">
                               {isExpanded ? (
-                                <ChevronUp className="w-5 h-5 theme-text-secondary" />
+                                <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 theme-text-secondary" />
                               ) : (
-                                <ChevronDown className="w-5 h-5 theme-text-secondary" />
+                                <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 theme-text-secondary" />
                               )}
                             </div>
                           </button>
 
                           {/* Expanded Content */}
                           {isExpanded && (
-                            <div className="px-5 pb-5 space-y-3">
+                            <div className="px-3 sm:px-5 pb-3 sm:pb-5 space-y-3">
                               {/* Description */}
-                              <p className="text-sm theme-text-secondary">{resource.description}</p>
+                              <p className="text-xs sm:text-sm theme-text-secondary">{resource.description}</p>
                               
                               {/* URL */}
                               <a
                                 href={resource.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-2 text-sm theme-text-tertiary hover:text-blue-500 transition-colors group"
+                                className="flex items-center gap-2 text-xs sm:text-sm theme-text-tertiary hover:text-blue-500 transition-colors group break-all"
                               >
-                                <ExternalLink className="w-4 h-4 flex-shrink-0" />
-                                <span className="truncate">{resource.url}</span>
+                                <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                                <span className="break-all">{resource.url}</span>
                               </a>
 
                               {/* Action Buttons */}
-                              <div className="flex items-center gap-2 pt-2">
+                              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-2">
                                 <button
                                   onClick={() => openEditModal(resource)}
-                                  className="flex items-center gap-2 px-4 py-2 theme-text-secondary hover:theme-text-primary hover:theme-bg-tertiary rounded-lg transition-colors"
+                                  className="flex items-center justify-center gap-2 px-4 py-2 theme-text-secondary hover:theme-text-primary hover:theme-bg-tertiary rounded-lg transition-colors"
                                   title="Edit"
                                 >
                                   <Edit2 className="w-4 h-4" />
@@ -824,7 +824,7 @@ export function Testerpage() {
                                 </button>
                                 <button
                                   onClick={() => deleteResource(resource.id)}
-                                  className="flex items-center gap-2 px-4 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg transition-colors"
+                                  className="flex items-center justify-center gap-2 px-4 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg transition-colors"
                                   title="Delete"
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -846,10 +846,10 @@ export function Testerpage() {
 
       {/* Add/Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="theme-bg-secondary theme-border border rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 theme-bg-secondary theme-border border-b px-6 py-4 flex items-center justify-between">
-              <h2 className="text-xl font-semibold theme-text-primary">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-2 sm:p-4 z-50">
+          <div className="theme-bg-secondary theme-border border rounded-xl max-w-lg w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 theme-bg-secondary theme-border border-b px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+              <h2 className="text-lg sm:text-xl font-semibold theme-text-primary">
                 {editingResource ? 'Edit Resource' : 'Add New Resource'}
               </h2>
               <button
@@ -861,7 +861,7 @@ export function Testerpage() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
               {/* Category Selection */}
               <div>
                 <label className="block text-sm font-medium theme-text-secondary mb-2">
@@ -915,12 +915,12 @@ export function Testerpage() {
               </div>
 
               {/* AI Generation Buttons */}
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <button
                   type="button"
                   onClick={handleAutoFill}
                   disabled={!formData.name.trim() || autoFilling}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  className="flex-1 flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm sm:text-base font-semibold rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                   title="Auto-fill URL and description using AI"
                 >
                   {autoFilling ? (
@@ -956,15 +956,15 @@ export function Testerpage() {
                 <button
                   type="button"
                   onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                  className="w-full flex items-center justify-between px-4 py-3 hover:theme-bg-primary transition-colors"
+                  className="w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 px-3 sm:px-4 py-3 hover:theme-bg-primary transition-colors"
                 >
                   <div className="flex items-center gap-2">
                     {isDescriptionExpanded ? (
-                      <ChevronUp className="w-5 h-5 theme-text-secondary" />
+                      <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 theme-text-secondary" />
                     ) : (
-                      <ChevronDown className="w-5 h-5 theme-text-secondary" />
+                      <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 theme-text-secondary" />
                     )}
-                    <label className="text-sm font-medium theme-text-secondary cursor-pointer">
+                    <label className="text-xs sm:text-sm font-medium theme-text-secondary cursor-pointer">
                       Description * {formData.description && `(${formData.description.length} chars)`}
                     </label>
                   </div>
@@ -975,17 +975,17 @@ export function Testerpage() {
                       handleGenerateDescription();
                     }}
                     disabled={!formData.name.trim() || generatingDescription}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-gradient-to-r from-pink-500 to-orange-500 text-white font-semibold rounded-lg hover:from-pink-600 hover:to-orange-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+                    className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm bg-gradient-to-r from-pink-500 to-orange-500 text-white font-semibold rounded-lg hover:from-pink-600 hover:to-orange-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
                     title="Generate description only using AI"
                   >
                     {generatingDescription ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
                         <span>Generating...</span>
                       </>
                     ) : (
                       <>
-                        <Sparkles className="w-4 h-4" />
+                        <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
                         <span>Generate</span>
                       </>
                     )}

@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Navigation } from './Navigation';
 import { ApiKeysPage } from './ApiKeysPage';
+import { WebsitePage } from './WebsitePage';
 import { SettingsPage } from './SettingsPage';
 import { DocumentationPage } from './DocumentationPage';
 import { Testerpage } from './Testerpage';
@@ -11,21 +12,16 @@ type Page = 'keys' | 'settings' | 'docs' | 'tester';
 
 export function Dashboard() {
   const { user, signOut } = useAuth();
-  const [currentPage, setCurrentPage] = useState<Page>('keys');
+  const location = useLocation();
 
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'keys':
-        return <ApiKeysPage />;
-      case 'settings':
-        return <SettingsPage />;
-        case 'docs':
-          return <DocumentationPage />;
-        case 'tester':
-          return <Testerpage />;
-      default:
-        return <ApiKeysPage />;
-    }
+  // Determine current page from URL path
+  const getCurrentPage = (): Page => {
+    const path = location.pathname;
+    if (path.startsWith('/api-keys')) return 'keys';
+    if (path === '/settings') return 'settings';
+    if (path === '/docs') return 'docs';
+    if (path === '/resources') return 'tester';
+    return 'keys';
   };
 
   return (
@@ -58,10 +54,17 @@ export function Dashboard() {
         </div>
       </header>
 
-      <Navigation currentPage={currentPage} onPageChange={setCurrentPage} />
+      <Navigation currentPage={getCurrentPage()} />
 
       <main>
-        {renderPage()}
+        <Routes>
+          <Route path="/" element={<ApiKeysPage />} />
+          <Route path="/api-keys" element={<ApiKeysPage />} />
+          <Route path="/api-keys/:serviceName" element={<WebsitePage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/docs" element={<DocumentationPage />} />
+          <Route path="/resources" element={<Testerpage />} />
+        </Routes>
       </main>
     </div>
   );

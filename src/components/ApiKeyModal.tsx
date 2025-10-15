@@ -7,10 +7,11 @@ import toast from 'react-hot-toast';
 interface ApiKeyModalProps {
   apiKey: ApiKey | null;
   onClose: () => void;
+  defaultServiceName?: string;
 }
 
-export function ApiKeyModal({ apiKey, onClose }: ApiKeyModalProps) {
-  const [serviceName, setServiceName] = useState('');
+export function ApiKeyModal({ apiKey, onClose, defaultServiceName }: ApiKeyModalProps) {
+  const [serviceName, setServiceName] = useState(defaultServiceName || '');
   const [emailUsername, setEmailUsername] = useState('');
   const [password, setPassword] = useState('');
   const [apiKeyValue, setApiKeyValue] = useState('');
@@ -37,8 +38,11 @@ export function ApiKeyModal({ apiKey, onClose }: ApiKeyModalProps) {
         setApiKeyValue(key);
         setDecrypting(false);
       });
+    } else if (defaultServiceName) {
+      // Pre-fill service name for new keys
+      setServiceName(defaultServiceName);
     }
-  }, [apiKey]);
+  }, [apiKey, defaultServiceName]);
 
   const handleAddTag = () => {
     const trimmedTag = tagInput.trim();

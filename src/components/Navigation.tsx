@@ -1,12 +1,12 @@
+import { NavLink } from 'react-router-dom';
 import { Key, Settings, FileText, Moon, Sun, Palette, Laptop } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface NavigationProps {
   currentPage: 'keys' | 'settings' | 'docs' | 'tester';
-  onPageChange: (page: 'keys' | 'settings' | 'docs' | 'tester') => void;
 }
 
-export function Navigation({ currentPage, onPageChange }: NavigationProps) {
+export function Navigation({ currentPage }: NavigationProps) {
   const { theme, setTheme } = useTheme();
 
   const getThemeIcon = () => {
@@ -22,10 +22,10 @@ export function Navigation({ currentPage, onPageChange }: NavigationProps) {
   };
 
   const navItems = [
-    { id: 'keys' as const, label: 'API Keys', icon: Key },
-    { id: 'tester' as const, label: 'Websites', icon: Laptop },
-    { id: 'docs' as const, label: 'Documentation', icon: FileText },
-    { id: 'settings' as const, label: 'Settings', icon: Settings },
+    { id: 'keys' as const, label: 'API Keys', icon: Key, path: '/api-keys' },
+    { id: 'tester' as const, label: 'Websites', icon: Laptop, path: '/resources' },
+    { id: 'docs' as const, label: 'Documentation', icon: FileText, path: '/docs' },
+    { id: 'settings' as const, label: 'Settings', icon: Settings, path: '/settings' },
   ];
 
   return (
@@ -38,9 +38,9 @@ export function Navigation({ currentPage, onPageChange }: NavigationProps) {
               const isActive = currentPage === item.id;
 
               return (
-                <button
+                <NavLink
                   key={item.id}
-                  onClick={() => onPageChange(item.id)}
+                  to={item.path}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all hover:bg-slate-700 ${
                     isActive
                       ? 'theme-accent text-white '
@@ -49,7 +49,7 @@ export function Navigation({ currentPage, onPageChange }: NavigationProps) {
                 >
                   <Icon className="w-4 h-4" />
                   <span className="hidden sm:inline">{item.label}</span>
-                </button>
+                </NavLink>
               );
             })}
           </div>
