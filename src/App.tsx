@@ -3,7 +3,6 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthForm } from './components/AuthForm';
 import { Dashboard } from './components/Dashboard';
-import { AIAssistantBubble } from './components/AIAssistantBubble';
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -16,13 +15,7 @@ function AppContent() {
     );
   }
 
-  return (
-    <>
-      {user ? <Dashboard /> : <AuthForm />}
-      {/* AI Assistant available on all pages when logged in */}
-      {user && <AIAssistantBubble />}
-    </>
-  );
+  return user ? <Dashboard /> : <AuthForm />;
 }
 
 function App() {

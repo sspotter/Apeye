@@ -7,7 +7,7 @@ export function DocumentationPage() {
       <div className="mb-12 text-center">
         <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 rounded-full animate-pulse">
           <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-          <span className="text-sm font-semibold text-purple-700 dark:text-purple-300">Now with Data Management & Custom Themes!</span>
+          <span className="text-sm font-semibold text-purple-700 dark:text-purple-300">Now with AI Assistant & More!</span>
         </div>
         <h1 className="text-5xl font-bold theme-text-primary mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
           Documentation
@@ -50,7 +50,7 @@ export function DocumentationPage() {
       </div>
 
       <div className="space-y-6">
-        {/* COMING SOON: AI Assistant Section */}
+        {/* NEW: AI Assistant Section */}
         <section className="theme-bg-secondary theme-border border-2 border-purple-500/20 rounded-xl p-6 hover:shadow-lg transition-shadow group">
           <div className="flex items-center gap-3 mb-4">
             <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-3 rounded-lg group-hover:scale-110 transition-transform">
@@ -59,37 +59,37 @@ export function DocumentationPage() {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-2xl font-semibold theme-text-primary">AI Assistant</h2>
-                <span className="px-2 py-1 text-xs font-bold bg-gradient-to-r from-orange-100 to-yellow-100 dark:from-orange-900/30 dark:to-yellow-900/30 text-orange-700 dark:text-orange-300 rounded-full animate-pulse">COMING SOON!</span>
+                <span className="px-2 py-1 text-xs font-bold bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 text-purple-700 dark:text-purple-300 rounded-full">NEW!</span>
               </div>
               <p className="text-sm theme-text-tertiary">Your intelligent coding companion</p>
             </div>
           </div>
           <div className="space-y-4">
             <p className="theme-text-secondary">
-              🤖 An AI assistant that understands your API management needs is coming soon! Get ready for instant code examples,
+              💬 Chat with an AI that understands your API management needs! Get instant code examples, 
               security tips, and context-aware help based on which service you're viewing.
             </p>
             <div className="grid sm:grid-cols-3 gap-3">
-              <div className="p-3 theme-bg-tertiary rounded-lg border border-blue-500/20 hover:border-blue-500/50 transition-colors opacity-75">
+              <div className="p-3 theme-bg-tertiary rounded-lg border border-blue-500/20 hover:border-blue-500/50 transition-colors">
                 <Zap className="w-5 h-5 text-blue-500 mb-2" />
                 <h4 className="font-medium theme-text-primary text-sm mb-1">Generate Code</h4>
                 <p className="text-xs theme-text-tertiary">Working integration snippets in seconds</p>
               </div>
-              <div className="p-3 theme-bg-tertiary rounded-lg border border-purple-500/20 hover:border-purple-500/50 transition-colors opacity-75">
+              <div className="p-3 theme-bg-tertiary rounded-lg border border-purple-500/20 hover:border-purple-500/50 transition-colors">
                 <Shield className="w-5 h-5 text-purple-500 mb-2" />
                 <h4 className="font-medium theme-text-primary text-sm mb-1">Best Practices</h4>
                 <p className="text-xs theme-text-tertiary">Security and organization tips</p>
               </div>
-              <div className="p-3 theme-bg-tertiary rounded-lg border border-green-500/20 hover:border-green-500/50 transition-colors opacity-75">
+              <div className="p-3 theme-bg-tertiary rounded-lg border border-green-500/20 hover:border-green-500/50 transition-colors">
                 <Eye className="w-5 h-5 text-green-500 mb-2" />
                 <h4 className="font-medium theme-text-primary text-sm mb-1">Context-Aware</h4>
                 <p className="text-xs theme-text-tertiary">Knows which service you're using</p>
               </div>
             </div>
-            <div className="p-4 bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+            <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
               <p className="text-sm theme-text-secondary">
-                <strong className="theme-text-primary">🚀 Stay Tuned:</strong> The AI assistant feature is currently in development.
-                We'll notify you when it's ready to help with your API management!
+                <strong className="theme-text-primary">💡 Pro Tip:</strong> Look for the glowing bubble in the bottom-right corner! 
+                Click it to start chatting with your AI assistant. Try asking "How do I use OpenAI?" or "Best security practices".
               </p>
             </div>
           </div>
@@ -348,6 +348,8 @@ export function DocumentationPage() {
             <span>🚀 Fast</span>
             <span>•</span>
             <span>🎨 Customizable</span>
+            <span>•</span>
+            <span>🤖 AI-Powered</span>
           </div>
         </div>
       </div>
