@@ -4,6 +4,7 @@ import { supabase, type ApiKey } from '../lib/supabase';
 import { ApiKeysTable } from './ApiKeysTable';
 import { ApiKeyModal } from './ApiKeyModal';
 import { MassAddModal } from './MassAddModal';
+import { MarkdownNotesSection } from './MarkdownNotesSection';
 import { ExportImportButtons } from './ExportImportButtons';
 import { getServiceMetadata } from '../lib/serviceMetadata';
 import { ArrowLeft, Plus, Key, Users } from 'lucide-react';
@@ -267,6 +268,9 @@ export function WebsitePage() {
           )}
         </div>
       </div>
+
+      {/* Markdown Documentation Section */}
+      <MarkdownNotesSection serviceName={decodedServiceName} />
 
       {/* API Keys Table */}
       {loading ? (
